@@ -1,0 +1,4 @@
+pulumi
+pulumi_aws
+argparse
+boto3
