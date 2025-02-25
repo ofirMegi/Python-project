@@ -11,6 +11,12 @@ ROUTE53 = boto3.client('route53')
 IAM = boto3.client('iam')
 USER_RESPONSE = IAM.get_user()
 USER_NAME = USER_RESPONSE['User']['UserName']
+MAX_DOT_IN_IP = 3
+OPTION1 = '1'
+OPTION2 = '2'
+OPTION3 = '3'
+DOT = '.'
+
 
 
 def create_zone():
@@ -24,10 +30,10 @@ def create_zone():
                 print("you entered invalid char")
         if len(domain_name) > MAX_HOSTED_ZONE_NAME_LEN:
             print('the maximum chars in hosted zone name are 253')
-        if domain_name[0] == "." or domain_name[-1] == ".":
+        if domain_name[0] == DOT or domain_name[-1] == DOT:
             print("you can't put '.' in the beginning/end of the name")
             break
-        parts = domain_name.split('.')
+        parts = domain_name.split(DOT)
         for part in parts:
             if len(part) == 0:
                 break
@@ -78,8 +84,8 @@ def collect_info(host_zone_id):
     flag = True
     while flag:
         ip_address = input("enter the ip address you want the record to be on: ")
-        if ip_address.count('.') == 3:
-            parts = ip_address.split('.')
+        if ip_address.count(DOT) == MAX_DOT_IN_IP:
+            parts = ip_address.split(DOT)
             for part in parts:
                 if not part.isdigit():
                     print("you can only enter digits")
@@ -100,11 +106,11 @@ def collect_info(host_zone_id):
 def check_what_action():
     while True:
         action_num = input("select the action you would like to do on the record:\n[1]CREATE\n[2]DELETE\n[3]UPSERT")
-        if action_num == '1':
+        if action_num == OPTION1:
             return 'CREATE'
-        if action_num == '2':
+        if action_num == OPTION2:
             return 'DELETE'
-        if action_num == '3':
+        if action_num == OPTION3:
             return 'UPSERT'
         print("you entered something wrong")
 
@@ -130,9 +136,9 @@ def action_on_dns_record(host_zone_id, record_set, action):
 
 def main():
     option = input("select what you would like to do:\n[1]Create zone\n[2]action on record")
-    if option == '1':
+    if option == OPTION1:
         create_zone()
-    elif option == '2':
+    elif option == OPTION2:
         action = check_what_action()
         flag = True
         while flag:

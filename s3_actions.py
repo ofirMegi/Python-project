@@ -2,6 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 import os
 import string
+import json
 
 PUBLIC_ACL_NUMBER = 1
 MIN_BUCKET_NAME_LEN = 3
@@ -11,7 +12,17 @@ IAM = boto3.client('iam')
 USER_RESPONSE = IAM.get_user()
 USER_NAME = USER_RESPONSE['User']['UserName']
 S3_BUCKET_NAME_ALLOWED_CHAR = string.ascii_lowercase + string.digits + '.-'
-
+OPTION1 = '1'
+OPTION2 = '2'
+OPTION3 = '3'
+PRIVATE = 'private'
+DOT = '.'
+NOT_FOUND = '404'
+NO_ACCESS = '403'
+YES = 'yes'
+MAX_OBJECT_NAME_LEN = 1024
+SPACE = ' '
+SLASH = '/'
 
 def create_bucket_info():
     flag = True
@@ -20,7 +31,7 @@ def create_bucket_info():
             flag2 = True
             while flag2:
                 bucket_name = input("enter the name of the bucket: ")
-                if bucket_name[0] == '.' or bucket_name[-1] == '.':
+                if bucket_name[0] == DOT or bucket_name[-1] == DOT:
                     print("the bucket name can not start or end with a dot")
                 elif ".." in bucket_name:
                     print("the bucket name can not have sequence of dots")
@@ -36,23 +47,23 @@ def create_bucket_info():
             S3.head_bucket(Bucket=bucket_name)
             print(f"the name {bucket_name} already exist")
         except ClientError as error:
-            if error.response['Error']['Code'] == '404':
+            if error.response['Error']['Code'] == NOT_FOUND:
                 print(f"the name {bucket_name} is not occupied ")
                 flag = False
-            if error.response['Error']['Code'] == '403':
+            if error.response['Error']['Code'] == NO_ACCESS:
                 print(f"the name {bucket_name} already exist ")
     acl_value = input("chose public or private:\n[1]public\n[2]private")
     if acl_value == PUBLIC_ACL_NUMBER:
         validate = input("are you sure?yes/no")
-        if validate.lower() == "yes":
+        if validate.lower() == YES:
             acl_value = 'public-read'
     else:
-        acl_value = 'private'
+        acl_value = PRIVATE
     return bucket_name, acl_value
 
 
 def create_bucket(bucket_name, acl_value):
-    if acl_value == 'private':
+    if acl_value == PRIVATE:
         response = S3.create_bucket(
             ACL=acl_value,
             Bucket=bucket_name)
@@ -140,15 +151,15 @@ def upload_file_info():
             print(f"the path ({file_path}) you entered is incorrect")
 
     bool_obj_name = input("would you like to add object name?yes/no ")
-    if bool_obj_name.lower() == 'yes':
+    if bool_obj_name.lower() == YES:
         flag = True
         while flag:
             object_name = input('enter the object file name: ')
-            if ' ' in object_name:
+            if SPACE in object_name:
                 print('the name you entered is incorrect, the name should be without any spaces')
-            elif object_name[-1] == '/':
+            elif object_name[-1] == SLASH:
                 print('the name you entered is incorrect, the last char cant be /')
-            elif len(object_name) > 1024:
+            elif len(object_name) > MAX_OBJECT_NAME_LEN:
                 print('the name you entered is incorrect, the len cant be above 1024')
             else:
                 flag = False
@@ -164,13 +175,13 @@ def upload_file_to_s3(file_path, bucket_name, object_name):
 
 def main():
     option = input("select what you would like to do:\n[1]Create S3 buckets\n[2]File Upload\n[3]List Buckets")
-    if option == '1':
+    if option == OPTION1:
         bucket_name, acl_value = create_bucket_info()
         create_bucket(bucket_name, acl_value)
-    elif option == '2':
+    elif option == OPTION2:
         file_path, bucket_name, object_name = upload_file_info()
         upload_file_to_s3(file_path, bucket_name, object_name)
-    elif option == '3':
+    elif option == OPTION3:
         print(list_of_buckets())
     else:
         print("you typed something wrong")

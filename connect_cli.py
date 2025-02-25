@@ -1,10 +1,11 @@
 
 import subprocess
 
+YES = 'yes'
 
 def check_if_aws_user_connected():
     question = input("are you connected to the aws cli? yes/no")
-    if question.lower() == 'yes':
+    if question.lower() == YES:
         return True
     return False
 
