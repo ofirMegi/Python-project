@@ -4,7 +4,7 @@ import os
 import string
 import json
 
-PUBLIC_ACL_NUMBER = 1
+
 MIN_BUCKET_NAME_LEN = 3
 MAX_BUCKET_NAME_LEN = 63
 S3 = boto3.client('s3')
@@ -25,35 +25,32 @@ SPACE = ' '
 SLASH = '/'
 
 def create_bucket_info():
-    flag = True
-    while flag:
+    bucket_name = ""
+    while True:
         try:
-            flag2 = True
-            while flag2:
+            while True:
                 bucket_name = input("enter the name of the bucket: ")
                 if bucket_name[0] == DOT or bucket_name[-1] == DOT:
                     print("the bucket name can not start or end with a dot")
                 elif ".." in bucket_name:
                     print("the bucket name can not have sequence of dots")
-                    break
                 elif MIN_BUCKET_NAME_LEN > len(bucket_name) or len(bucket_name) > MAX_BUCKET_NAME_LEN:
                     print("the bucket name len needs to be 3-63 letters")
                 for char in bucket_name:
                     if char not in S3_BUCKET_NAME_ALLOWED_CHAR:
                         print("you entered invalid char")
-                        break
                 else:
-                    flag2 = False
+                    break
             S3.head_bucket(Bucket=bucket_name)
             print(f"the name {bucket_name} already exist")
         except ClientError as error:
             if error.response['Error']['Code'] == NOT_FOUND:
                 print(f"the name {bucket_name} is not occupied ")
-                flag = False
+                break
             if error.response['Error']['Code'] == NO_ACCESS:
                 print(f"the name {bucket_name} already exist ")
     acl_value = input("chose public or private:\n[1]public\n[2]private")
-    if acl_value == PUBLIC_ACL_NUMBER:
+    if acl_value == '1':
         validate = input("are you sure?yes/no")
         if validate.lower() == YES:
             acl_value = 'public-read'
@@ -63,21 +60,19 @@ def create_bucket_info():
 
 
 def create_bucket(bucket_name, acl_value):
-    if acl_value == PRIVATE:
-        response = S3.create_bucket(
-            ACL=acl_value,
-            Bucket=bucket_name)
-        print("the action completed")
-        tag_response = S3.put_bucket_tagging(
-            Bucket=bucket_name,
-            Tagging={
-                'TagSet': [
-                    {'Key': 'CreatedFromCli', 'Value': 'True'},
-                    {'Key': 'Owner', 'Value': USER_NAME}
-                ]
-            }
-        )
-    else:
+    response = S3.create_bucket(
+        Bucket=bucket_name)
+    print("the action completed")
+    tag_response = S3.put_bucket_tagging(
+        Bucket=bucket_name,
+        Tagging={
+            'TagSet': [
+                {'Key': 'CreatedFromCli', 'Value': 'True'},
+                {'Key': 'Owner', 'Value': USER_NAME}
+            ]
+        }
+    )
+    if acl_value == 'public-read':
         S3.put_public_access_block(
             Bucket=bucket_name,
             PublicAccessBlockConfiguration={
@@ -132,28 +127,26 @@ def list_of_buckets():
     return  buckets_with_tag
 
 def upload_file_info():
-    flag = True
-    while flag:
+    while True:
         list_buckets = list_of_buckets()
         print(f'the buckets you can choose: {list_buckets}')
         bucket_name = input("enter the bucket name: ")
         if bucket_name not in list_buckets:
             print(f'the bucket {bucket_name} cannot be selected ')
         else:
-            flag = False
+            break
 
-    flag = True
-    while flag:
+
+    while True:
         file_path = input("enter the file path: ")
         if os.path.exists(file_path):
-            flag = False
+            break
         else:
             print(f"the path ({file_path}) you entered is incorrect")
 
     bool_obj_name = input("would you like to add object name?yes/no ")
     if bool_obj_name.lower() == YES:
-        flag = True
-        while flag:
+        while True:
             object_name = input('enter the object file name: ')
             if SPACE in object_name:
                 print('the name you entered is incorrect, the name should be without any spaces')
@@ -162,9 +155,10 @@ def upload_file_info():
             elif len(object_name) > MAX_OBJECT_NAME_LEN:
                 print('the name you entered is incorrect, the len cant be above 1024')
             else:
-                flag = False
+                break
     else:
         object_name = os.path.basename(file_path)
+
     return file_path, bucket_name, object_name
 
 
