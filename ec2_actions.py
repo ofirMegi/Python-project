@@ -42,6 +42,8 @@ def information_for_the_new_EC2_instance():
 
 
 def create_parameter_from_info(instance_name, type_op_num, ami_choice):
+    ec2_type = ""
+    ami = ""
     if type_op_num == OPTION1:
         ec2_type = T3
         if ami_choice == OPTION1:
@@ -93,11 +95,10 @@ def create_EC2_instance(instance_name, ec2_type, ami):
 def stop_instance():
     run_filters = [{'Name': 'instance-state-name', 'Values': ['running']}, {'Name': 'tag:Owner', 'Values': [USER_NAME]}, {'Name': 'tag:from', 'Values': ['cli']}]
     instances_dict = dict_of_instances(run_filters)
-    flag = True
-    while flag:
+    while True:
         instance_id = input(f'choose from here what would you like to stop: {instances_dict}')
         if instance_id in instances_dict:
-            flag = False
+            break
         else:
             print(f'the instance with the id {instance_id} cannot be stopped from here')
     response = EC2.stop_instances(InstanceIds=[instance_id])
