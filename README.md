@@ -42,7 +42,10 @@ If you don't have `boto3` or `awscli` installed, the script will prompt you to i
 pip install boto3
 pip install awscli
 ```
-
+or run the script: 
+```bash
+python connect_cli
+```
 ### Step 2: Configure AWS CLI
 
 The script will check if the AWS CLI is configured. If it's not, you will be prompted to provide the following AWS credentials:
@@ -57,6 +60,10 @@ You can configure these credentials manually by running the following command:
 aws configure
 ```
 
+or run the script: 
+```bash
+python connect_cli
+```
 You will be prompted to enter your AWS Access Key ID, Secret Access Key, Default Region Name, and Default Output Format.
 
 ### Step 3: Run the Script
