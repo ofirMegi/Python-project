@@ -31,10 +31,23 @@ def connect_to_aws_account(aws_access_key_id, aws_secret_access_key, aws_region)
 
 
 def main():
-    if not check_if_aws_user_connected():
-        aws_access_key_id, aws_secret_access_key, aws_region = collect_and_return_aws_connection_information()
-        connect_to_aws_account(aws_access_key_id, aws_secret_access_key, aws_region)
+        validate = input('do you need to install boto3?yes/no')
+        if validate.lower() == YES:
+            try:
+                subprocess.check_call(["pip", "install", "boto3"])
+            except subprocess.CalledProcessError as e:
+                print(f"Error occurred while installing boto3: {e}")
+        validate = input('do you need to install awscli?yes/no')
+        if validate.lower() == YES:
+            try:
+                subprocess.check_call(["pip", "install", "awscli"])
+            except subprocess.CalledProcessError as e:
+                print(f"Error occurred while installing AWS CLI: {e}")
+        if not check_if_aws_user_connected():
+            aws_access_key_id, aws_secret_access_key, aws_region = collect_and_return_aws_connection_information()
+            connect_to_aws_account(aws_access_key_id, aws_secret_access_key, aws_region)
 
 
-
+if __name__ == '__main__':
+    main()
 
