@@ -73,16 +73,14 @@ def dict_of_hosted_zone_created_cli():
 
 def collect_info(host_zone_id):
     host_zone_dict = dict_of_hosted_zone_created_cli()
-    flag = True
-    while flag:
+    while True:
         ttl = input("enter the TTL number: ")
         if ttl.isdigit():
             ttl = int(ttl)
-            flag = False
+            break
         else:
             print("you can only enter digits")
-    flag = True
-    while flag:
+    while True:
         ip_address = input("enter the ip address you want the record to be on: ")
         if ip_address.count(DOT) == MAX_DOT_IN_IP:
             parts = ip_address.split(DOT)
@@ -90,7 +88,7 @@ def collect_info(host_zone_id):
                 if not part.isdigit():
                     print("you can only enter digits")
                     break
-            flag = False
+            break
         else:
             print("the ip is invalid there are too many dots")
     record_set = {
@@ -140,13 +138,12 @@ def main():
         create_zone()
     elif option == OPTION2:
         action = check_what_action()
-        flag = True
-        while flag:
+        while True:
             host_zone_dict = dict_of_hosted_zone_created_cli()
             print(host_zone_dict)
             host_zone_id = input("enter the id of the host zone you would like to work on")
             if host_zone_id in host_zone_dict:
-                flag = False
+                break
             else:
                 print("Error: This zone was not created from the CLI. Cannot create DNS record.")
         host_zone_id, record_set = collect_info(host_zone_id)
